@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spain Travel Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .title {
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 18px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 18px;
+        }
+        .recommendations {
+            margin-top: 40px;
+        }
+        .recommendations ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .recommendations li {
+            margin-bottom: 10px;
+        }
+        .map {
+            margin-top: 40px;
+        }
+        .map iframe {
+            width: 100%;
+            height: 320px;
+            border: 0;
+            border-radius: 18px;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            <h1>Spain Travel Guide</h1>
+        </div>
+        <div class="subtitle">
+            <p>Discover the beauty and culture of Spain, from its stunning beaches to its vibrant cities.</p>
+        </div>
+        <div class="cards">
+            <div class="card">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Alhambra,_Generalife,_Granada,_Spain.jpg" alt="Alhambra">
+                <p>Alhambra: A historic palace and fortress complex in Granada, showcasing Moorish architecture.</p>
+            </div>
+            <div class="card">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Park_G%C3%BCell_-_Barcelona_-_Spain.jpg" alt="Park Güell">
+                <p>Park Güell: A public park in Barcelona, featuring stunning architecture and city views.</p>
+            </div>
+            <div class="card">
+                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Museo_del_Prado_01.jpg" alt="Museo del Prado">
+                <p>Museo del Prado: A world-renowned art museum in Madrid, housing an extensive collection of European art.</p>
+            </div>
+        </div>
+        <div class="recommendations">
+            <h2>Recommendations:</h2>
+            <ul>
+                <li>Try the local cuisine, including tapas and paella.</li>
+                <li>Visit the famous beaches of the Costa Brava and Costa del Sol.</li>
+                <li>Explore the historic cities of Madrid, Barcelona, and Seville.</li>
+            </ul>
+        </div>
+        <div class="map">
+            <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-18.169998%2C27.634501%2C4.329999%2C43.808001&layer=mapnik" frameborder="0"></iframe>
+        </div>
+        <div class="footer">
+            <p>Status: pending approval by email. If rejected, n8n regenerates the page using the reviewer comment.</p>
+            <p>No reviewer comment was provided.</p>
+        </div>
+    </div>
+</body>
+</html>
