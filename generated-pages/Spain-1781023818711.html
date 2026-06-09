@@ -1,0 +1,85 @@
+<html>
+<head>
+    <title>Travel Guide to Spain</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .hero {
+            background-image: url('https://source.unsplash.com/1600x900/?spain');
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        .attractions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .attraction {
+            background-color: #fff;
+            margin: 10px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: calc(33.33% - 20px);
+        }
+        .attraction img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px 10px 0 0;
+        }
+        .map {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+        }
+        .recommendations {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Discover Spain</h1>
+    </div>
+    <div class="attractions">
+        <div class="attraction">
+            <img src="https://source.unsplash.com/600x400/?sagrada-familia" alt="Sagrada Familia">
+            <h2>Sagrada Familia</h2>
+            <p>Barcelona's iconic cathedral designed by Antoni Gaudí</p>
+        </div>
+        <div class="attraction">
+            <img src="https://source.unsplash.com/600x400/?alhambra" alt="Alhambra">
+            <h2>Alhambra</h2>
+            <p>A medieval Islamic palace in Granada, showcasing Moorish architecture</p>
+        </div>
+        <div class="attraction">
+            <img src="https://source.unsplash.com/600x400/?park-guell" alt="Park Güell">
+            <h2>Park Güell</h2>
+            <p>A public park in Barcelona, featuring stunning mosaics and city views</p>
+        </div>
+    </div>
+    <div class="map">
+        <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-18.176025390625%2C27.641021728515625%2C4.328125%2C43.7734375&layer=mapnik" frameborder="0" width="100%" height="400"></iframe>
+    </div>
+    <div class="recommendations">
+        <h2>Recommendations</h2>
+        <ul>
+            <li>Try traditional Spanish cuisine, such as paella and tapas</li>
+            <li>Visit during the spring or autumn for mild weather</li>
+            <li>Explore the vibrant cities of Madrid, Barcelona, and Seville</li>
+        </ul>
+    </div>
+</body>
+</html>
