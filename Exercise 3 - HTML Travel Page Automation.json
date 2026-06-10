@@ -1,0 +1,746 @@
+{
+  "name": "Exercise 3 - HTML Travel Page Automation",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "814c740d-41df-4fc9-a04e-4dfe25fc380f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_SHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Pending"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        0
+      ],
+      "id": "715f0d62-1e7e-47c1-92e1-7e24d636eba9",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RECONNECT_CREDENTIAL_IN_N8N",
+          "name": "Reconnect Google Sheets credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY_HERE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Return only valid JSON. No markdown. No code fences. No explanations.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Create a travel guide for: {{ $json.Location }}.\\n\\nReturn valid JSON with exactly two string fields:\\n{\\n  \\\"generatedHtml\\\": \\\"full standalone HTML document\\\",\\n  \\\"reviewHtml\\\": \\\"compact approval-page HTML fragment\\\"\\n}\\n\\nImportant JSON rules:\\n- Do not return markdown.\\n- Do not wrap the JSON in code fences.\\n- Escape all quotes correctly so the result is valid JSON.\\n- The final response must be parseable by JSON.parse().\\n\\ngeneratedHtml requirements:\\n- Must be a complete standalone HTML document.\\n- Must start with <!DOCTYPE html> and end with </html>.\\n- Must include modern CSS.\\n- Must include exactly 3 attraction cards with realistic images.\\n- Must include recommendations.\\n- Must include a real OpenStreetMap-based map with exactly 3 visible attraction markers.\\n- Do not use Leaflet.\\n- Prefer OpenLayers for the standalone generatedHtml map.\\n- Use OpenLayers CDN CSS and JS if needed.\\n- Markers must be created from real latitude and longitude coordinates.\\n- Each marker must show the attraction name.\\n- The map must automatically fit all 3 markers in view.\\n- Must look good as a standalone browser page.\\n- Use a clean travel landing-page style with cards, spacing, readable typography, and responsive layout.\\n\\nreviewHtml requirements:\\n- This is the version shown inside the n8n Respond / webhook page.\\n- It must be an HTML fragment only.\\n- Do not include <!DOCTYPE html>, <html>, <head>, <body>, or external JavaScript.\\n- Do not use scripts.\\n- Do not use Bootstrap.\\n- Do not use Tailwind.\\n- Do not use Leaflet.\\n- Do not use OpenLayers in reviewHtml.\\n- Do not use source.unsplash.com.\\n- Do not use absolute positioning.\\n- Do not use min-height: 100vh.\\n- Do not use horizontal layouts that can overflow.\\n- Do not create 3 columns in reviewHtml.\\n- The reviewHtml must use a single-column layout so it is not cropped inside the n8n form page.\\n- Use inline styles on the elements.\\n- The wrapper must use: max-width: 100%; width: 100%; box-sizing: border-box; overflow: visible;\\n- Each attraction card must use: width: 100%; box-sizing: border-box; margin-bottom: 22px;\\n- Each image must use: width: 100%; max-width: 100%; height: 220px; object-fit: cover; display: block; border-radius: 18px;\\n- Text must be readable, centered where appropriate, and not dense.\\n- Include a title, subtitle, 3 image cards, recommendations, and a map section.\\n- The map section in reviewHtml should use a simple OpenStreetMap iframe with width:100%; height:320px; border:0; border-radius:18px; display:block.\\n- The reviewHtml must display well inside a narrow n8n approval page.\\n\\nImportant map behavior:\\n- OpenStreetMap iframe previews do not reliably show 3 custom markers inside the n8n response page.\\n- Therefore, in reviewHtml, below the map iframe, add a clearly visible section titled Attraction points.\\n- The Attraction points section is mandatory.\\n- It must show exactly 3 point cards, one for each attraction.\\n- Each point card must include the attraction name, latitude, longitude, and a direct Open in OpenStreetMap link.\\n- The OpenStreetMap link format must be: https://www.openstreetmap.org/?mlat=LATITUDE&mlon=LONGITUDE#map=14/LATITUDE/LONGITUDE\\n- Do not manually draw fake pins with CSS.\\n- Do not manually guess pixel positions for markers.\\n- If the reviewHtml iframe cannot show all markers, the Attraction points section below the map acts as the visible coordinate list for the reviewer.\\n\\nFor Israel, use these exact attractions:\\n1. Western Wall, Jerusalem | description: A historic landmark in Jerusalem's Old City. | lat: 31.7767 | lon: 35.2345 | image: https://commons.wikimedia.org/wiki/Special:FilePath/Jerusalem%20Western%20Wall%202017.jpg | OpenStreetMap link: https://www.openstreetmap.org/?mlat=31.7767&mlon=35.2345#map=14/31.7767/35.2345\\n2. Dead Sea | description: A unique desert lake famous for floating and mineral-rich water. | lat: 31.5590 | lon: 35.4732 | image: https://commons.wikimedia.org/wiki/Special:FilePath/Dead%20Sea,%20Israel.jpg | OpenStreetMap link: https://www.openstreetmap.org/?mlat=31.5590&mlon=35.4732#map=14/31.5590/35.4732\\n3. Tel Aviv Beach | description: A Mediterranean beach area with city life, food, and nightlife. | lat: 32.0853 | lon: 34.7818 | image: https://commons.wikimedia.org/wiki/Special:FilePath/TelAviv%20beach%20from%20sky.jpg | OpenStreetMap link: https://www.openstreetmap.org/?mlat=32.0853&mlon=34.7818#map=14/32.0853/34.7818\\n\\nIf the destination is not Israel:\\n- Choose exactly 3 famous attractions.\\n- Use stable realistic image URLs, preferably Wikimedia Commons Special:FilePath URLs.\\n- Use real approximate coordinates.\\n- For each attraction, create a valid OpenStreetMap link using its latitude and longitude.\\n- In generatedHtml, show the 3 markers on the map using real coordinates.\\n- In reviewHtml, show the map iframe and the Attraction points section with the 3 coordinate links.\\n\\nReviewer comment, if this is a regenerated version:\\n{{ $json.ReviewerComment || 'No reviewer comment was provided.' }}\\n\\nThe reviewHtml should look like a clean vertical travel preview, not a full website squeezed into the form. The generatedHtml should look like a complete polished standalone travel page.\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"max_completion_tokens\": 6000,\n  \"response_format\": {\n    \"type\": \"json_object\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        464,
+        0
+      ],
+      "id": "6de5339f-2e80-44eb-9c03-d006b25b7a2b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_SHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "GeneratedHtml": "={{ $json.GeneratedHtml }}",
+            "Status": "={{ $json.Status }}",
+            "UpdatedAt": "={{ $json.UpdatedAt }}",
+            "ReviewHtml": "={{ $json.ReviewHtml }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ReviewerComment",
+              "displayName": "ReviewerComment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "GeneratedHtml",
+              "displayName": "GeneratedHtml",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PageLink",
+              "displayName": "PageLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "GitHubBackupLink",
+              "displayName": "GitHubBackupLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CreatedAt",
+              "displayName": "CreatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "UpdatedAt",
+              "displayName": "UpdatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ReviewHtml",
+              "displayName": "ReviewHtml",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        896,
+        0
+      ],
+      "id": "24a73dd5-64f7-4720-a126-89c449eb6dc0",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RECONNECT_CREDENTIAL_IN_N8N",
+          "name": "Reconnect Google Sheets credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "TESTER_EMAIL@example.com",
+        "subject": "=Generated Travel HTML Page - {{ $json.UpdatedAt }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 100%; width: 100%; box-sizing: border-box; overflow: visible;\">\n  {{ $('Prepare HTML Data').first().json.ReviewHtml }}\n</div>\n\n<hr style=\"margin: 28px 0; border: none; border-top: 1px solid #ddd;\">\n\n<p style=\"font-family: Arial, sans-serif; font-size: 15px; line-height: 1.6; text-align: center;\">\n  Please review the generated travel page preview above.\n  Then choose <strong>Approve</strong> or <strong>Reject</strong> below.\n  If you reject it, you may add an optional comment.\n</p>",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "decision",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Approve"
+                  },
+                  {
+                    "option": "Reject"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "reviewerComment",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "4921f4e7-a13c-4084-b2c9-2fe27771d771",
+      "name": "Send message and wait for response",
+      "webhookId": "482aafa3-99b9-4425-b43e-b34d7a9e82f1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RECONNECT_CREDENTIAL_IN_N8N",
+          "name": "Reconnect Gmail credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalData = $('Prepare HTML Data').first().json;\nconst response = $input.first().json;\n\nconst decision =\n  response.data?.decision ||\n  response.decision ||\n  response.data?.Decision ||\n  response.Decision ||\n  \"\";\n\nconst rawComment =\n  response.data?.reviewerComment ||\n  response.reviewerComment ||\n  response.data?.ReviewerComment ||\n  response.ReviewerComment ||\n  \"\";\n\nconst approved = decision.toString().toLowerCase() === \"approve\";\n\nconst reviewerComment = approved\n  ? \"\"\n  : rawComment.trim() || \"Rejected without comment\";\n\nreturn [\n  {\n    json: {\n      ...originalData,\n      Status: approved ? \"Approved\" : \"Rejected\",\n      Approved: approved,\n      ReviewerComment: reviewerComment,\n      UpdatedAt: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        0
+      ],
+      "id": "586292d6-7667-4908-a77d-a703c9ec1f6f",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sheetRow = $('Get row(s) in sheet').first().json;\nconst groqOutput = $input.first().json;\n\nlet content = groqOutput.choices?.[0]?.message?.content || \"\";\n\ncontent = content\n  .replace(/^```json\\s*/i, \"\")\n  .replace(/^```\\s*/i, \"\")\n  .replace(/```$/i, \"\")\n  .trim();\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(content);\n} catch (error) {\n  parsed = {\n    generatedHtml: content,\n    reviewHtml: `\n      <div style=\"font-family:Arial,sans-serif;max-width:100%;width:100%;box-sizing:border-box;padding:20px;line-height:1.6;text-align:center;\">\n        <h2 style=\"margin:0 0 12px;\">Generated travel page</h2>\n        <p>The generated page was created, but the review preview could not be parsed.</p>\n        <p>Please check the GeneratedHtml field in Google Sheets or the GitHub backup file.</p>\n      </div>\n    `\n  };\n}\n\nreturn [\n  {\n    json: {\n      ...sheetRow,\n      GeneratedHtml: parsed.generatedHtml || \"\",\n      ReviewHtml: parsed.reviewHtml || \"\",\n      Status: \"Generated\",\n      UpdatedAt: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        0
+      ],
+      "id": "fe37e06a-63b6-4feb-939c-d90992a99794",
+      "name": "Prepare HTML Data"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_SHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "Status": "={{ $json.Status }}",
+            "UpdatedAt": "={{ $json.UpdatedAt }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ReviewerComment",
+              "displayName": "ReviewerComment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "GeneratedHtml",
+              "displayName": "GeneratedHtml",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PageLink",
+              "displayName": "PageLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "GitHubBackupLink",
+              "displayName": "GitHubBackupLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CreatedAt",
+              "displayName": "CreatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "UpdatedAt",
+              "displayName": "UpdatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        0
+      ],
+      "id": "4a2b0b92-2c19-4f07-82d1-d1bbc9aa257d",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RECONNECT_CREDENTIAL_IN_N8N",
+          "name": "Reconnect Google Sheets credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "YOUR_GITHUB_USERNAME",
+          "mode": "list",
+          "cachedResultName": "YOUR_GITHUB_USERNAME",
+          "cachedResultUrl": "https://github.com/YOUR_GITHUB_USERNAME"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "YOUR_DESIGNATED_BACKUP_GITHUB_REPO",
+          "mode": "list",
+          "cachedResultName": "YOUR_DESIGNATED_BACKUP_GITHUB_REPO",
+          "cachedResultUrl": "https://github.com/YOUR_GITHUB_USERNAME/YOUR_DESIGNATED_BACKUP_GITHUB_REPO"
+        },
+        "filePath": "=generated-pages/{{ $('Prepare HTML Data').first().json.Location }}-{{ Date.now() }}.html",
+        "fileContent": "={{ $('Prepare HTML Data').first().json.GeneratedHtml }}",
+        "commitMessage": "=Backup approved travel HTML page for {{ $('Prepare HTML Data').first().json.Location }}",
+        "additionalParameters": {
+          "branch": {
+            "branch": "main"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1728,
+        0
+      ],
+      "id": "f317f08e-d2d8-4618-9e38-2cfcae8f4fcf",
+      "name": "Create a file",
+      "webhookId": "b04e421b-ca82-4e9b-8a3c-1166166deba4",
+      "credentials": {
+        "githubApi": {
+          "id": "RECONNECT_CREDENTIAL_IN_N8N",
+          "name": "Reconnect GitHub credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_SHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Prepare HTML Data').first().json.row_number }}",
+            "GitHubBackupLink": "={{ $json.content.html_url }}",
+            "PageLink": "={{ $json.content.html_url }}",
+            "Status": "={{ $('Update row in sheet1').first().json.Status }}",
+            "UpdatedAt": "={{ $('Update row in sheet1').first().json.UpdatedAt }}",
+            "ReviewerComment": "={{ $('Code in JavaScript1').first().json.ReviewerComment }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ReviewerComment",
+              "displayName": "ReviewerComment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "GeneratedHtml",
+              "displayName": "GeneratedHtml",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PageLink",
+              "displayName": "PageLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "GitHubBackupLink",
+              "displayName": "GitHubBackupLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CreatedAt",
+              "displayName": "CreatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "UpdatedAt",
+              "displayName": "UpdatedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1936,
+        0
+      ],
+      "id": "1f239d32-d227-4e66-b901-e43adb4f66bc",
+      "name": "Update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RECONNECT_CREDENTIAL_IN_N8N",
+          "name": "Reconnect Google Sheets credential"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Prepare HTML Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare HTML Data": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Create a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a file": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "REIMPORT_VERSION_ID",
+  "meta": {
+    "instanceId": "REIMPORT_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "REIMPORT_WORKFLOW_ID",
+  "tags": []
+}
